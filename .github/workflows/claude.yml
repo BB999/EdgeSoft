@@ -11,7 +11,9 @@ on:
     types: [submitted]
 
 jobs:
-  claude:
+  # Step 1: Write tests first
+  write-tests:
+    name: "Step 1: Write Tests"
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
@@ -23,16 +25,14 @@ jobs:
       pull-requests: read
       issues: read
       id-token: write
-      actions: read # Required for Claude to read CI results on PRs
+      actions: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      # Step 1: Write tests first (without implementation)
-      - name: Step 1 - Write tests
-        id: write-tests
+      - name: Write tests (without implementation)
         uses: anthropics/claude-code-action@beta
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -41,11 +41,28 @@ jobs:
             Do NOT implement the functionality.
             Tests should fail initially.
             Focus on test coverage and edge cases.
+          additional_permissions: |
+            actions: read
 
-      # Step 2: Write implementation to pass tests
-      - name: Step 2 - Write implementation
-        id: write-implementation
-        if: always() && steps.write-tests.outcome == 'success'
+  # Step 2: Write implementation
+  write-implementation:
+    name: "Step 2: Write Implementation"
+    needs: write-tests
+    if: always() && needs.write-tests.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Write implementation to pass tests
         uses: anthropics/claude-code-action@beta
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -53,15 +70,31 @@ jobs:
             IMPORTANT: Write ONLY the implementation to pass the tests.
             Do NOT modify the tests.
             Make the tests pass with minimum required code.
+          additional_permissions: |
+            actions: read
 
-      # Step 3: Verify tests pass
-      - name: Step 3 - Verify tests
-        id: verify-tests
-        if: always() && steps.write-implementation.outcome == 'success'
+  # Step 3: Verify tests pass
+  verify-tests:
+    name: "Step 3: Verify Tests"
+    needs: [write-tests, write-implementation]
+    if: always() && needs.write-implementation.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run and verify all tests
         uses: anthropics/claude-code-action@beta
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-
           custom_instructions: |
             IMPORTANT: Run all tests and report results.
             Fix any failing tests if needed.
@@ -69,4 +102,3 @@ jobs:
           allowed_tools: "Bash(npm test),Bash(npm run test:*),Bash(jest),Bash(pytest),Bash(go test),Bash(cargo test)"
           additional_permissions: |
             actions: read
-
