@@ -52,6 +52,8 @@ jobs:
             8. Focus on edge cases, error handling, and full test coverage
             9. Commit ONLY the test files and package configuration to the branch
             10. Tests MUST fail when run (red phase of TDD)
+            11. Push the branch to remote repository
+          allowed_tools: "Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*)"
           additional_permissions: |
             actions: read
 
@@ -73,6 +75,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ env.BRANCH_NAME }}
 
       - name: Write implementation to pass tests
         uses: anthropics/claude-code-action@beta
@@ -80,17 +83,18 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           custom_instructions: |
             IMPORTANT - TDD GREEN PHASE:
-            1. Switch to existing branch using EXACT name: ${{ env.BRANCH_NAME }}
-            2. Use command: git checkout ${{ env.BRANCH_NAME }}
-            3. Run tests first to confirm they are failing (red phase)
-            4. Write ONLY the minimal implementation to make tests pass
-            5. Do NOT modify any test files
-            6. Create only the necessary source/implementation files
-            7. Implement functions/classes exactly as referenced in the tests
-            8. Use minimal code - implement only what's needed to pass tests
-            9. Run tests after implementation to confirm they pass (green phase)
-            10. Commit the implementation files to the SAME branch: ${{ env.BRANCH_NAME }}
+            1. You are already on the correct branch: ${{ env.BRANCH_NAME }}
+            2. Run tests first to confirm they are failing (red phase)
+            3. Write ONLY the minimal implementation to make tests pass
+            4. Do NOT modify any test files
+            5. Create only the necessary source/implementation files
+            6. Implement functions/classes exactly as referenced in the tests
+            7. Use minimal code - implement only what's needed to pass tests
+            8. Run tests after implementation to confirm they pass (green phase)
+            9. Install dependencies if needed using npm install or similar
+            10. Commit the implementation files to the current branch
             11. Include meaningful commit message describing the implementation
+          allowed_tools: "Bash(npm install),Bash(npm test),Bash(npm run test:*),Bash(jest),Bash(pytest),Bash(go test),Bash(cargo test),Bash(git add:*),Bash(git commit:*),Bash(git status:*),Bash(git diff:*)"
           additional_permissions: |
             actions: read
 
@@ -112,6 +116,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ env.BRANCH_NAME }}
 
       - name: Run and verify all tests
         uses: anthropics/claude-code-action@beta
@@ -119,17 +124,17 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           custom_instructions: |
             IMPORTANT - TDD REFACTOR PHASE:
-            1. Switch to existing branch using EXACT name: ${{ env.BRANCH_NAME }}
-            2. Use command: git checkout ${{ env.BRANCH_NAME }}
+            1. You are already on the correct branch: ${{ env.BRANCH_NAME }}
+            2. Install dependencies if needed using npm install or similar
             3. Run all tests to verify current state
             4. If tests are failing, analyze and fix the implementation (NOT the tests)
             5. Refactor code for better quality while keeping tests passing
             6. Ensure 100% test coverage and all tests pass
             7. Run any additional quality checks (linting, type checking if configured)
-            8. Commit any refactoring/fixes to the SAME branch: ${{ env.BRANCH_NAME }}
+            8. Commit any refactoring/fixes to the current branch
             9. Create a Pull Request from ${{ env.BRANCH_NAME }} to main branch when all tests pass
             10. Include comprehensive PR description with TDD cycle summary
             11. Tag the original issue #${{ github.event.issue.number }} in the PR description
-          allowed_tools: "Bash(npm test),Bash(npm run test:*),Bash(jest),Bash(pytest),Bash(go test),Bash(cargo test)"
+          allowed_tools: "Bash(npm install),Bash(npm test),Bash(npm run test:*),Bash(jest),Bash(pytest),Bash(go test),Bash(cargo test),Bash(git add:*),Bash(git commit:*),Bash(git status:*),Bash(git diff:*),Bash(git push:*)"
           additional_permissions: |
             actions: read
