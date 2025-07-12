@@ -10,6 +10,9 @@ on:
   pull_request_review:
     types: [submitted]
 
+env:
+  BRANCH_NAME: claude/issue-${{ github.event.issue.number }}-${{ github.run_id }}
+
 jobs:
   # Step 1: Write tests first
   write-tests:
@@ -39,15 +42,16 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           custom_instructions: |
             IMPORTANT - TDD RED PHASE: 
-            1. Create a new branch for this TDD cycle (format: claude/issue-{issue_number}-{timestamp})
-            2. Write ONLY test files - NO implementation files whatsoever
-            3. Do NOT create any source/implementation files (no .js/.py/.go files in src/ folder)
-            4. Do NOT create placeholder classes or functions
-            5. Tests should be comprehensive and cover all requirements
-            6. Tests should reference non-existent functions/classes (they will be created in Step 2)
-            7. Focus on edge cases, error handling, and full test coverage
-            8. Commit ONLY the test files and package configuration to the branch
-            9. Tests MUST fail when run (red phase of TDD)
+            1. Create branch using EXACT name: ${{ env.BRANCH_NAME }}
+            2. Use command: git checkout -b ${{ env.BRANCH_NAME }}
+            3. Write ONLY test files - NO implementation files whatsoever
+            4. Do NOT create any source/implementation files (no .js/.py/.go files in src/ folder)
+            5. Do NOT create placeholder classes or functions
+            6. Tests should be comprehensive and cover all requirements
+            7. Tests should reference non-existent functions/classes (they will be created in Step 2)
+            8. Focus on edge cases, error handling, and full test coverage
+            9. Commit ONLY the test files and package configuration to the branch
+            10. Tests MUST fail when run (red phase of TDD)
           additional_permissions: |
             actions: read
 
@@ -76,16 +80,17 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           custom_instructions: |
             IMPORTANT - TDD GREEN PHASE:
-            1. Switch to the TDD branch created in Step 1 (claude/issue-{issue_number}-{timestamp})
-            2. Run tests first to confirm they are failing (red phase)
-            3. Write ONLY the minimal implementation to make tests pass
-            4. Do NOT modify any test files
-            5. Create only the necessary source/implementation files
-            6. Implement functions/classes exactly as referenced in the tests
-            7. Use minimal code - implement only what's needed to pass tests
-            8. Run tests after implementation to confirm they pass (green phase)
-            9. Commit the implementation files to the SAME branch as Step 1
-            10. Include meaningful commit message describing the implementation
+            1. Switch to existing branch using EXACT name: ${{ env.BRANCH_NAME }}
+            2. Use command: git checkout ${{ env.BRANCH_NAME }}
+            3. Run tests first to confirm they are failing (red phase)
+            4. Write ONLY the minimal implementation to make tests pass
+            5. Do NOT modify any test files
+            6. Create only the necessary source/implementation files
+            7. Implement functions/classes exactly as referenced in the tests
+            8. Use minimal code - implement only what's needed to pass tests
+            9. Run tests after implementation to confirm they pass (green phase)
+            10. Commit the implementation files to the SAME branch: ${{ env.BRANCH_NAME }}
+            11. Include meaningful commit message describing the implementation
           additional_permissions: |
             actions: read
 
@@ -114,16 +119,17 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           custom_instructions: |
             IMPORTANT - TDD REFACTOR PHASE:
-            1. Switch to the TDD branch from previous steps (claude/issue-{issue_number}-{timestamp})
-            2. Run all tests to verify current state
-            3. If tests are failing, analyze and fix the implementation (NOT the tests)
-            4. Refactor code for better quality while keeping tests passing
-            5. Ensure 100% test coverage and all tests pass
-            6. Run any additional quality checks (linting, type checking if configured)
-            7. Commit any refactoring/fixes to the SAME branch
-            8. Create a Pull Request to main branch when all tests pass
-            9. Include comprehensive PR description with TDD cycle summary
-            10. Tag the original issue in the PR description
+            1. Switch to existing branch using EXACT name: ${{ env.BRANCH_NAME }}
+            2. Use command: git checkout ${{ env.BRANCH_NAME }}
+            3. Run all tests to verify current state
+            4. If tests are failing, analyze and fix the implementation (NOT the tests)
+            5. Refactor code for better quality while keeping tests passing
+            6. Ensure 100% test coverage and all tests pass
+            7. Run any additional quality checks (linting, type checking if configured)
+            8. Commit any refactoring/fixes to the SAME branch: ${{ env.BRANCH_NAME }}
+            9. Create a Pull Request from ${{ env.BRANCH_NAME }} to main branch when all tests pass
+            10. Include comprehensive PR description with TDD cycle summary
+            11. Tag the original issue #${{ github.event.issue.number }} in the PR description
           allowed_tools: "Bash(npm test),Bash(npm run test:*),Bash(jest),Bash(pytest),Bash(go test),Bash(cargo test)"
           additional_permissions: |
             actions: read
