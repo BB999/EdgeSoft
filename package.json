@@ -1,0 +1,16 @@
+{
+  "name": "edgesoft-string-utils",
+  "version": "1.0.0",
+  "description": "String utility functions implemented with TDD",
+  "main": "src/stringUtils.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}
