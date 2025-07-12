@@ -38,13 +38,16 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           custom_instructions: |
-            IMPORTANT: 
-            1. Create a new branch for this TDD cycle
-            2. Write ONLY tests for the requested feature
-            3. Do NOT implement the functionality
-            4. Tests should fail initially
-            5. Focus on test coverage and edge cases
-            6. Commit the tests to the new branch
+            IMPORTANT - TDD RED PHASE: 
+            1. Create a new branch for this TDD cycle (format: claude/issue-{issue_number}-{timestamp})
+            2. Write ONLY test files - NO implementation files whatsoever
+            3. Do NOT create any source/implementation files (no .js/.py/.go files in src/ folder)
+            4. Do NOT create placeholder classes or functions
+            5. Tests should be comprehensive and cover all requirements
+            6. Tests should reference non-existent functions/classes (they will be created in Step 2)
+            7. Focus on edge cases, error handling, and full test coverage
+            8. Commit ONLY the test files and package configuration to the branch
+            9. Tests MUST fail when run (red phase of TDD)
           additional_permissions: |
             actions: read
 
@@ -72,12 +75,17 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           custom_instructions: |
-            IMPORTANT: 
-            1. Switch to the existing TDD branch created in Step 1
-            2. Write ONLY the implementation to pass the tests
-            3. Do NOT modify the tests
-            4. Make the tests pass with minimum required code
-            5. Commit the implementation to the same branch
+            IMPORTANT - TDD GREEN PHASE:
+            1. Switch to the TDD branch created in Step 1 (claude/issue-{issue_number}-{timestamp})
+            2. Run tests first to confirm they are failing (red phase)
+            3. Write ONLY the minimal implementation to make tests pass
+            4. Do NOT modify any test files
+            5. Create only the necessary source/implementation files
+            6. Implement functions/classes exactly as referenced in the tests
+            7. Use minimal code - implement only what's needed to pass tests
+            8. Run tests after implementation to confirm they pass (green phase)
+            9. Commit the implementation files to the SAME branch as Step 1
+            10. Include meaningful commit message describing the implementation
           additional_permissions: |
             actions: read
 
@@ -105,13 +113,17 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           custom_instructions: |
-            IMPORTANT: 
-            1. Switch to the existing TDD branch from previous steps
-            2. Run all tests and report results
-            3. Fix any failing tests if needed
-            4. Ensure all tests pass before completing
-            5. Commit any test fixes to the same branch
-            6. Create a Pull Request when all tests pass
+            IMPORTANT - TDD REFACTOR PHASE:
+            1. Switch to the TDD branch from previous steps (claude/issue-{issue_number}-{timestamp})
+            2. Run all tests to verify current state
+            3. If tests are failing, analyze and fix the implementation (NOT the tests)
+            4. Refactor code for better quality while keeping tests passing
+            5. Ensure 100% test coverage and all tests pass
+            6. Run any additional quality checks (linting, type checking if configured)
+            7. Commit any refactoring/fixes to the SAME branch
+            8. Create a Pull Request to main branch when all tests pass
+            9. Include comprehensive PR description with TDD cycle summary
+            10. Tag the original issue in the PR description
           allowed_tools: "Bash(npm test),Bash(npm run test:*),Bash(jest),Bash(pytest),Bash(go test),Bash(cargo test)"
           additional_permissions: |
             actions: read
