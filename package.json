@@ -1,0 +1,25 @@
+{
+  "name": "edgesoft-string-utils",
+  "version": "1.0.0",
+  "description": "String utility functions for EdgeSoft",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "keywords": ["string", "utility", "tdd"],
+  "author": "EdgeSoft",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "coverageDirectory": "coverage",
+    "testMatch": [
+      "**/__tests__/**/*.test.js",
+      "**/?(*.)+(spec|test).js"
+    ]
+  }
+}
